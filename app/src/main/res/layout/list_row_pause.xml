@@ -20,7 +20,7 @@
         android:gravity="center"
         android:layout_weight="1"
         android:textSize="25dp"
-        android:id="@+id/pause_time"
+        android:id="@+id/time"
         />
 
 </LinearLayout>

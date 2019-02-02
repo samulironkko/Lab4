@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 public abstract class WorkoutPartBase implements Serializable {
 
-    abstract public String getName();
+    abstract public void setTime(String data);
+    abstract public String getTime();
 
 }
