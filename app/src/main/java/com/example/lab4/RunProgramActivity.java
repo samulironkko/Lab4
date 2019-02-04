@@ -2,12 +2,14 @@ package com.example.lab4;
 
 import android.content.Intent;
 import android.os.CountDownTimer;
+import android.speech.tts.TextToSpeech;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.ListIterator;
+import java.util.Locale;
 
 public class RunProgramActivity extends AppCompatActivity {
 
@@ -15,6 +17,8 @@ public class RunProgramActivity extends AppCompatActivity {
     TextView timeTextview;
     TextView nameTextview;
     ListIterator<WorkoutPartBase> iterator;
+    TextToSpeech textToSpeech;
+    String name;
 
 
     @Override
@@ -25,27 +29,32 @@ public class RunProgramActivity extends AppCompatActivity {
         nameTextview = (TextView)findViewById(R.id.workout_name);
         timeTextview = (TextView)findViewById(R.id.time_textview);
         iterator = workouts.listIterator();
-        iterate();
+        textToSpeech = new TextToSpeech(getApplicationContext(), new TextToSpeech.OnInitListener() {
+            @Override
+            public void onInit(int i) {
+                if (i == TextToSpeech.SUCCESS) {
+                    textToSpeech.setLanguage(Locale.US);
+                    iterate();
+                }
+            }
+        });
+
     }
 
     private void iterate() {
 
-        if (iterator.hasNext() == false) {
-            finish();
-        }
-
-        while (iterator.hasNext()) {
+        if (iterator.hasNext()) {
 
             current = iterator.next();
-            if (current instanceof WorkoutPart) {
-                nameTextview.setText("Workout");
-            } else {
-                nameTextview.setText("Pause");
-            }
+            name = current.getName();
+            nameTextview.setText(name);
+
             startTimer();
             iterator.remove();
-            break;
-
+        }
+        else {
+            textToSpeech.shutdown();
+            finish();
         }
     }
 
@@ -53,6 +62,7 @@ public class RunProgramActivity extends AppCompatActivity {
 
         final String time = current.getTime();
         long duration = Integer.parseInt(time) * 1000;
+        textToSpeech.speak(name, TextToSpeech.QUEUE_FLUSH, null);
 
         new CountDownTimer(duration, 1000) {
             @Override
@@ -65,5 +75,12 @@ public class RunProgramActivity extends AppCompatActivity {
                 iterate();
             }
         }.start();
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        textToSpeech.stop();
+        textToSpeech.shutdown();
     }
 }

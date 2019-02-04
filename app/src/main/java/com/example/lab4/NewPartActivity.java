@@ -31,11 +31,13 @@ public class NewPartActivity extends AppCompatActivity {
                 if (workoutRadio.isChecked()) {
                     WorkoutPart workoutPart = new WorkoutPart();
                     workoutPart.setTime(editText.getText().toString());
+                    workoutPart.setName();
                     returnData(workoutPart);
                 }
                 else if (pauseRadio.isChecked()) {
                     PausePart pausePart = new PausePart();
                     pausePart.setTime(editText.getText().toString());
+                    pausePart.setName();
                     returnData(pausePart);
                 }
 

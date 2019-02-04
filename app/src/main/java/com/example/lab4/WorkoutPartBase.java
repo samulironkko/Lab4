@@ -6,5 +6,7 @@ public abstract class WorkoutPartBase implements Serializable {
 
     abstract public void setTime(String data);
     abstract public String getTime();
+    abstract public void setName();
+    abstract public String getName();
 
 }
