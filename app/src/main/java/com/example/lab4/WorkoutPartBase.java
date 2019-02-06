@@ -1,5 +1,7 @@
 package com.example.lab4;
 
+import android.os.Parcelable;
+
 import java.io.Serializable;
 
 public abstract class WorkoutPartBase implements Serializable {
