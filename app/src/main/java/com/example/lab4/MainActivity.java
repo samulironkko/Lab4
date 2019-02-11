@@ -1,11 +1,13 @@
 package com.example.lab4;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.PersistableBundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
@@ -102,8 +104,27 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             startActivityForResult(intent, ADD_NEW_PART_REQ_ID);
         }
         else if (item.getItemId() == R.id.clear_item) {
-            workouts.clear();
-            onResume();
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setCancelable(true);
+            builder.setTitle("Clear workouts");
+            builder.setMessage("Do you really want to clear workouts?");
+            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    workouts.clear();
+                    onResume();
+                }
+            });
+            builder.setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+
+                }
+            });
+
+            AlertDialog dialog = builder.create();
+            dialog.show();
+
         }
         return true;
     }
