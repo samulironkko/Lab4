@@ -1,5 +1,6 @@
 package com.example.lab4;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.PersistableBundle;
@@ -14,11 +15,19 @@ import android.view.View;
 import android.widget.ListView;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
@@ -27,9 +36,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     ArrayList<WorkoutPartBase> workouts;
     ListView listView = null;
-    Gson gson;
-    SharedPreferences appSharedPrefs;
-    SharedPreferences.Editor prefsEditor;
+    FileOutputStream outputStream;
+    FileInputStream inputStream;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,26 +46,37 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setContentView(R.layout.activity_main);
         listView = findViewById(R.id.list_view);
         findViewById(R.id.start_workout_button).setOnClickListener(this);
-        appSharedPrefs = PreferenceManager
-                .getDefaultSharedPreferences(this.getApplicationContext());
-        gson = new Gson();
-        if (appSharedPrefs.contains("Workouts")) {
-            String json = appSharedPrefs.getString("Workouts", "");
-            Type type = new TypeToken<ArrayList<WorkoutPartBase>>(){}.getType();
-            workouts = gson.fromJson(json, type);
+        workouts = new ArrayList<WorkoutPartBase>();
+
+        try {
+            inputStream = openFileInput("workoutFile");
+            ObjectInputStream objectInputStream = new ObjectInputStream(inputStream);
+            workouts = (ArrayList)objectInputStream.readObject();
+            objectInputStream.close();
+            inputStream.close();
+
+        }catch (IOException ioe){
+            ioe.printStackTrace();
+            return;
+        }catch (ClassNotFoundException c){
+            c.printStackTrace();
+            return;
         }
-        else {
-            workouts = new ArrayList<>();
-        }
+
     }
 
     @Override
     protected void onStop() {
+        try {
+            outputStream = openFileOutput("workoutFile", Context.MODE_PRIVATE);
+            ObjectOutputStream objectOutputStream = new ObjectOutputStream(outputStream);
+            objectOutputStream.writeObject(workouts);
+            objectOutputStream.close();
+            outputStream.close();
+        }catch (IOException ioe){
+            ioe.printStackTrace();
+        }
         super.onStop();
-        prefsEditor = appSharedPrefs.edit();
-        String jsonWorkouts = gson.toJson(workouts);
-        prefsEditor.putString("Workouts", jsonWorkouts);
-        prefsEditor.apply();
     }
 
     @Override
@@ -77,9 +97,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         super.onOptionsItemSelected(item);
-
-        Intent intent = new Intent(this, NewPartActivity.class);
-        startActivityForResult(intent, ADD_NEW_PART_REQ_ID);
+        if (item.getItemId() == R.id.new_button) {
+            Intent intent = new Intent(this, NewPartActivity.class);
+            startActivityForResult(intent, ADD_NEW_PART_REQ_ID);
+        }
+        else if (item.getItemId() == R.id.clear_item) {
+            workouts.clear();
+            onResume();
+        }
         return true;
     }
 
